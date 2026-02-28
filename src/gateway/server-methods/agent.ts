@@ -480,6 +480,22 @@ export const agentHandlers: GatewayRequestHandlers = {
       }
     }
 
+    // Propagate parent session's tool event recipients to sub-agent runs.
+    // Sub-agent spawns arrive as server-side gateway calls (no client.connId),
+    // but the parent's WS clients should receive sub-agent tool events too.
+    if (!connId && spawnedByValue) {
+      for (const [activeRunId, active] of context.chatAbortControllers) {
+        if (active.sessionKey === spawnedByValue) {
+          const parentRecipients = context.getToolEventRecipients(activeRunId);
+          if (parentRecipients) {
+            for (const parentConnId of parentRecipients) {
+              context.registerToolEventRecipient(runId, parentConnId);
+            }
+          }
+        }
+      }
+    }
+
     const wantsDelivery = request.deliver === true;
     const explicitTo =
       typeof request.replyTo === "string" && request.replyTo.trim()

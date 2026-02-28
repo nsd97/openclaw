@@ -754,6 +754,7 @@ export async function startGatewayServer(
       addChatRun,
       removeChatRun,
       registerToolEventRecipient: toolEventRecipients.add,
+      getToolEventRecipients: toolEventRecipients.get,
       dedupe,
       wizardSessions,
       findRunningWizard,
